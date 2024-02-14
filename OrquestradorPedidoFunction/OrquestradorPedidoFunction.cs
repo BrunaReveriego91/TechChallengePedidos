@@ -3,35 +3,33 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Newtonsoft.Json;
 using System.IO;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using TechChallengePedidos.Model.Model;
 
-namespace ReceberPedidoFunction
+namespace OrquestradorPedidoFunction
 {
-    public static class ReceberPedidoFunction
+    public static class OrquestradorPedidoFunction
     {
-        [FunctionName("ReceberPedidoFunction")]
+        [FunctionName("OrquestrarPedidoFunction")]
         public static async Task<IActionResult> ReceberPedido(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
         [DurableClient] IDurableOrchestrationClient starter)
         {
             try
             {
+                // Ler o corpo da requisição como um JSON para obter o pedido
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                Pedido pedido = JsonConvert.DeserializeObject<Pedido>(requestBody);
 
-                var httpClient = new HttpClient();
-
-                await httpClient.PostAsync("http://localhost:7071/api/OrquestrarPedidoFunction", content);
-
-                return new OkObjectResult("Pedido recebido com sucesso.");
-
+                // Iniciar a instância do orquestrador
+                string instanceId = await starter.StartNewAsync("RunOrchestrator", pedido);
+                return starter.CreateCheckStatusResponse(req, instanceId);
             }
             catch
             {
-                return new BadRequestObjectResult("Falha ao receber pedido.");
+                return new BadRequestObjectResult("Falha ao orquestrar pedido.");
             }
         }
     }

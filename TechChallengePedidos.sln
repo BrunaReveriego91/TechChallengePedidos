@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReceberPedidoFunction", "Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechChallengePedidos.Model", "TechChallengePedidos.Model\TechChallengePedidos.Model.csproj", "{A24AA941-4ACF-408F-BED0-1081B87B4BAC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrquestradorPedidoFunction", "OrquestradorPedidoFunction\OrquestradorPedidoFunction.csproj", "{5411054A-E10A-484D-B309-075A7E8BAD6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5411054A-E10A-484D-B309-075A7E8BAD6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5411054A-E10A-484D-B309-075A7E8BAD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5411054A-E10A-484D-B309-075A7E8BAD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5411054A-E10A-484D-B309-075A7E8BAD6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
