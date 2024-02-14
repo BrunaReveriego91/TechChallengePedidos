@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReceberPedidoFunction", "ReceberPedidoFunction\ReceberPedidoFunction.csproj", "{74265F0B-BE43-45BE-B9F9-4CB9ED0DA4BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechChallengePedidos.Model", "TechChallengePedidos.Model\TechChallengePedidos.Model.csproj", "{A24AA941-4ACF-408F-BED0-1081B87B4BAC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{74265F0B-BE43-45BE-B9F9-4CB9ED0DA4BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74265F0B-BE43-45BE-B9F9-4CB9ED0DA4BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74265F0B-BE43-45BE-B9F9-4CB9ED0DA4BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74265F0B-BE43-45BE-B9F9-4CB9ED0DA4BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A24AA941-4ACF-408F-BED0-1081B87B4BAC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F6AE81F-5772-4AFF-A24E-CA9261B4A578}
+	EndGlobalSection
+EndGlobal
