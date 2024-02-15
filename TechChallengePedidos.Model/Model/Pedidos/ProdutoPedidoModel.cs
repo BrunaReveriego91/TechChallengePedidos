@@ -1,6 +1,6 @@
-﻿namespace TechChallengePedidos.Model.Model
+﻿namespace TechChallengePedidos.Model.Model.Pedidos
 {
-    public class Produto
+    public class ProdutoPedidoModel
     {
         public int Id { get; set; }
         public double ValorUnitario { get; set; }

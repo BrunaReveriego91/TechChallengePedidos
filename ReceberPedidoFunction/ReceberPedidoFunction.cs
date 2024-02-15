@@ -24,7 +24,13 @@ namespace ReceberPedidoFunction
 
                 var httpClient = new HttpClient();
 
-                await httpClient.PostAsync("http://localhost:7071/api/OrquestrarPedidoFunction", content);
+                var response = await httpClient.PostAsync("http://localhost:7071/api/OrquestrarPedidoFunction", content);
+
+                string mensagem = await response.Content.ReadAsStringAsync();
+
+                if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    return new BadRequestObjectResult(mensagem);
+
 
                 return new OkObjectResult("Pedido recebido com sucesso.");
 

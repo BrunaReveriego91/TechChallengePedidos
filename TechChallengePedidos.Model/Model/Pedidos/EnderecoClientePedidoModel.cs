@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TechChallengePedidos.Model.Model
+namespace TechChallengePedidos.Model.Model.Pedidos
 {
-    public class EnderecoCliente
+    public class EnderecoClientePedidoModel
     {
         public string Rua { get; set; }
         public string Numero { get; set; }
