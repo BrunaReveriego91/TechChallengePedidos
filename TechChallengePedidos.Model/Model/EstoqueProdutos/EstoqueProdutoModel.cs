@@ -1,6 +1,4 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
-using Newtonsoft.Json;
-using System.Runtime.Serialization;
 
 namespace TechChallengePedidos.Model.Model.EstoqueProdutos
 {
