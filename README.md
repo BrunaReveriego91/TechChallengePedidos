@@ -30,7 +30,6 @@ Request:
     "produtos": [
         {
             "id": 1,
-            "valorunitario": 10.5,
             "quantidade": 999
         }
     ]
