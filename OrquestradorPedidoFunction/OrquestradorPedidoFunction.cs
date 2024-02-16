@@ -1,27 +1,34 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.WindowsAzure.Storage;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using TechChallengePedidos.Model.Model.EstoqueProdutos;
 using TechChallengePedidos.Model.Model.Pedidos;
 using TechChallengePedidos.Model.Model.Produtos;
-using Microsoft.WindowsAzure.Storage;
-using System;
+using TechChallengePedidos.Repository.Interfaces;
 
 namespace OrquestradorPedidoFunction
 {
-    public static class OrquestradorPedidoFunction
+    public class OrquestradorPedidoFunction<T>
     {
+        private readonly IMongoDbRepository<T> _mongoDbRepository;
+
+        public OrquestradorPedidoFunction(IMongoDbRepository<T> mongoDbRepository)
+        {
+            _mongoDbRepository = mongoDbRepository;
+        }
+
         [FunctionName("OrquestrarPedidoFunction")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             [DurableClient] IDurableOrchestrationClient starter)
         {
@@ -44,7 +51,7 @@ namespace OrquestradorPedidoFunction
         }
 
         [FunctionName("OrquestradorPedido")]
-        public static async Task<List<string>> OrquestradorPedido(
+        public async Task<List<string>> OrquestradorPedido(
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var pedido = context.GetInput<PedidoModel>();
@@ -85,28 +92,22 @@ namespace OrquestradorPedidoFunction
             return outputs;
         }
 
-        [FunctionName("ObterEstoque")]
-        public static async Task<List<EstoqueModel>> ObterEstoque([ActivityTrigger] IDurableActivityContext context)
-        {
-            var client = new MongoClient(System.Environment.GetEnvironmentVariable("MongoDBAtlasConnectionString"));
-            var database = client.GetDatabase("db_tech_challenge");
-            var collection = database.GetCollection<EstoqueModel>("estoque");
 
-            return await collection.Find(_ => true).ToListAsync();
+        [FunctionName("ObterEstoque")]
+        public async Task<List<EstoqueModel>> ObterEstoque([ActivityTrigger] IDurableActivityContext context)
+        {
+            return await _mongoDbRepository.ObterDatabaseCollection<EstoqueModel>("estoque");
         }
 
         [FunctionName("ObterProdutos")]
-        public static async Task<List<CadastroProdutoModel>> ObterProdutos([ActivityTrigger] IDurableActivityContext context)
+        public async Task<List<CadastroProdutoModel>> ObterProdutos([ActivityTrigger] IDurableActivityContext context)
         {
-            var client = new MongoClient(System.Environment.GetEnvironmentVariable("MongoDBAtlasConnectionString"));
-            var database = client.GetDatabase("db_tech_challenge");
-            var collection = database.GetCollection<CadastroProdutoModel>("produtos");
+            return await _mongoDbRepository.ObterDatabaseCollection<CadastroProdutoModel>("produtos");
 
-            return await collection.Find(_ => true).ToListAsync();
         }
 
         [FunctionName("ArmazenarPedidoBlobStorage")]
-        public static async Task<int> ArmazenarPedidoBlobStorage([ActivityTrigger] IDurableActivityContext context)
+        public async Task<int> ArmazenarPedidoBlobStorage([ActivityTrigger] IDurableActivityContext context)
         {
             var pedido = context.GetInput<PedidoModel>();
 
