@@ -13,10 +13,10 @@ Request:
     {   
         "nome": "Fulano de Tal",
         "email": "teste@gmail.com",
-        "cpf": "426.450.748-04",
+        "cpf": "184.623.410-78",
         "contatoPrimario": "(11)99999-9999",
         "contatoSecundario": null,
-        "nascimento": "1991-10-14T00:00:00Z",
+        "nascimento": "1989-10-01T00:00:00Z",
         "endereco": {
              "rua": "Rua ABC",
              "numero": "123",
