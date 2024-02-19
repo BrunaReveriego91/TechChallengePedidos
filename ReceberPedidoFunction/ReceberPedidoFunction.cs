@@ -14,7 +14,7 @@ namespace ReceberPedidoFunction
     {
         /*Alterar conforme necessidade*/
 
-        public const string urlOrquestrador = $"http://localhost:7071/api/OrquestrarPedidoFunction";
+        public const string urlOrquestrador = $"http://localhost:7072/api/OrquestrarPedidoFunction";
 
         [FunctionName("ReceberPedidoFunction")]
         public static async Task<IActionResult> ReceberPedido(
@@ -32,7 +32,7 @@ namespace ReceberPedidoFunction
 
                 string mensagem = await response.Content.ReadAsStringAsync();
 
-                if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                if (response.StatusCode != System.Net.HttpStatusCode.OK || response.StatusCode != System.Net.HttpStatusCode.Accepted)
                     return new BadRequestObjectResult(mensagem);
 
 

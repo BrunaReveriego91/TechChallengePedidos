@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using TechChallengePedidos.Model.Model.EstoqueProdutos;
 using TechChallengePedidos.Model.Model.Pedidos;
@@ -19,6 +21,7 @@ namespace OrquestradorPedidoFunction
 {
     public class OrquestradorPedidoFunction
     {
+        public const string urlProcessarPedido = "http://localhost:7073/api/ProcessarPedidoFunction";
         private static IMongoDatabase ObterConexaoDatabase()
         {
             var client = new MongoClient(System.Environment.GetEnvironmentVariable("MongoDBAtlasConnectionString"));
@@ -83,8 +86,9 @@ namespace OrquestradorPedidoFunction
             }
 
             var numeroPedido = await context.CallActivityAsync<int>("ArmazenarPedidoBlobStorage", pedido);
-
             pedido.IdPedido = numeroPedido;
+
+            await context.CallActivityAsync<int>("ProcessarPedido", pedido);
 
             outputs.Add(JsonConvert.SerializeObject(pedido));
 
@@ -157,5 +161,25 @@ namespace OrquestradorPedidoFunction
 
             return numeroPedido;
         }
+
+
+        [FunctionName("ProcessarPedido")]
+        public async Task ProcessarPedido([ActivityTrigger] IDurableActivityContext context)
+        {
+            var pedido = context.GetInput<PedidoModel>();
+
+            string requestBody = JsonConvert.SerializeObject(pedido);
+            var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+
+            var httpClient = new HttpClient();
+
+            var response = await httpClient.PostAsync(urlProcessarPedido, content);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK || response.StatusCode != System.Net.HttpStatusCode.Accepted)
+                throw new Exception("Falha ao orquestrar pedido.");
+
+
+        }
     }
 }
+
