@@ -9,7 +9,7 @@ Endpoint: http://localhost:7290/api/ReceberPedidoFunction
 
 Request: 
 
-
+```json
 {
   "cliente": {
     "nome": "Fulano de Tal",
@@ -35,5 +35,6 @@ Request:
     }
   ]
 }
+```
   
 
