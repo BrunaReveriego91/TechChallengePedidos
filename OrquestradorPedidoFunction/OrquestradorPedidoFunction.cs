@@ -14,17 +14,16 @@ using System.Threading.Tasks;
 using TechChallengePedidos.Model.Model.EstoqueProdutos;
 using TechChallengePedidos.Model.Model.Pedidos;
 using TechChallengePedidos.Model.Model.Produtos;
-using TechChallengePedidos.Repository.Interfaces;
 
 namespace OrquestradorPedidoFunction
 {
-    public class OrquestradorPedidoFunction<T>
+    public class OrquestradorPedidoFunction
     {
-        private readonly IMongoDbRepository<T> _mongoDbRepository;
-
-        public OrquestradorPedidoFunction(IMongoDbRepository<T> mongoDbRepository)
+        private static IMongoDatabase ObterConexaoDatabase()
         {
-            _mongoDbRepository = mongoDbRepository;
+            var client = new MongoClient(System.Environment.GetEnvironmentVariable("MongoDBAtlasConnectionString"));
+            var database = client.GetDatabase("db_tech_challenge");
+            return database;
         }
 
         [FunctionName("OrquestrarPedidoFunction")]
@@ -96,13 +95,20 @@ namespace OrquestradorPedidoFunction
         [FunctionName("ObterEstoque")]
         public async Task<List<EstoqueModel>> ObterEstoque([ActivityTrigger] IDurableActivityContext context)
         {
-            return await _mongoDbRepository.ObterDatabaseCollection<EstoqueModel>("estoque");
+            IMongoDatabase database = ObterConexaoDatabase();
+            var collection = database.GetCollection<EstoqueModel>("estoque");
+
+            return await collection.Find(_ => true).ToListAsync();
+
         }
 
         [FunctionName("ObterProdutos")]
         public async Task<List<CadastroProdutoModel>> ObterProdutos([ActivityTrigger] IDurableActivityContext context)
         {
-            return await _mongoDbRepository.ObterDatabaseCollection<CadastroProdutoModel>("produtos");
+            IMongoDatabase database = ObterConexaoDatabase();
+            var collection = database.GetCollection<CadastroProdutoModel>("produtos");
+
+            return await collection.Find(_ => true).ToListAsync();
 
         }
 

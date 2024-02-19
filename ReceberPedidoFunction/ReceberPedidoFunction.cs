@@ -12,6 +12,10 @@ namespace ReceberPedidoFunction
 {
     public static class ReceberPedidoFunction
     {
+        /*Alterar conforme necessidade*/
+
+        public const string urlOrquestrador = $"http://localhost:7071/api/OrquestrarPedidoFunction";
+
         [FunctionName("ReceberPedidoFunction")]
         public static async Task<IActionResult> ReceberPedido(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
@@ -24,7 +28,7 @@ namespace ReceberPedidoFunction
 
                 var httpClient = new HttpClient();
 
-                var response = await httpClient.PostAsync("http://localhost:7071/api/OrquestrarPedidoFunction", content);
+                var response = await httpClient.PostAsync(urlOrquestrador, content);
 
                 string mensagem = await response.Content.ReadAsStringAsync();
 
