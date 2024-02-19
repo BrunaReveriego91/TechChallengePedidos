@@ -1,6 +1,6 @@
 # TechChallengePedidos
 
-![TechChallenge2](https://github.com/BrunaReveriego91/TechChallengePedidos/assets/94184681/124f6b60-04a0-496f-afdf-1e96b40cffb4)
+![img-tech-challenge](https://github.com/BrunaReveriego91/TechChallengePedidos/assets/94184681/3b1e8808-8800-41cf-aabe-226802a661b7)
 
    
 Exemplo de request:
