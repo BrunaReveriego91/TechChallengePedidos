@@ -4,7 +4,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
@@ -38,7 +37,7 @@ public class ProcessarPedidoFunction
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             PedidoModel pedido = JsonConvert.DeserializeObject<PedidoModel>(requestBody);
 
-            var pedidoInstanceId = await starter.StartNewAsync("EnviarEmailOrchestrator", pedido);
+            var pedidoInstanceId = await starter.StartNewAsync("IniciarProcessoPedido", pedido);
 
             return starter.CreateCheckStatusResponse(req, pedidoInstanceId);
         }
@@ -48,21 +47,23 @@ public class ProcessarPedidoFunction
         }
     }
 
-    [FunctionName("EnviarEmailOrchestrator")]
-    public async Task EnviarEmailOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context)
+    [FunctionName("IniciarProcessoPedido")]
+    public async Task IniciarProcessoPedido([OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var pedido = context.GetInput<PedidoModel>();
-
         var produtoItems = await context.CallActivityAsync<List<CadastroProdutoModel>>("ObterProdutos", null);
 
-        foreach (var produtoPedido in pedido.Produtos)
+
+        foreach (var produto in pedido.Produtos)
         {
             var produtoItem = produtoItems.FirstOrDefault();
             if (!produtoItem.Produtos.Any())
                 throw new Exception();
 
-            produtoPedido.DescricaoProduto = produtoItem.Produtos.Where(x => x.ProdutoId == produtoPedido.Id).FirstOrDefault().Descricao;
-            produtoPedido.Valor = produtoItem.Produtos.Where(x => x.ProdutoId == produtoPedido.Id).FirstOrDefault().Valor;
+            produto.DescricaoProduto = produtoItem.Produtos.Where(x => x.ProdutoId == produto.Id).FirstOrDefault().Descricao;
+            produto.Valor = produtoItem.Produtos.Where(x => x.ProdutoId == produto.Id).FirstOrDefault().Valor;
+
+            await context.CallActivityAsync("AtualizarEstoqueProduto", produto);
         }
 
         await context.CallActivityAsync("EnviarEmailActivity", pedido);
@@ -87,30 +88,28 @@ public class ProcessarPedidoFunction
         IMongoDatabase database = ObterConexaoDatabase();
         var collection = database.GetCollection<EstoqueModel>("estoque");
 
-        var estoqueProduto = await collection.Find(x => x.Estoque.Any(e => e.ProdutoId == produtoPedido.Id))
-                                       .Project(x => x.Estoque.FirstOrDefault(e => e.ProdutoId == produtoPedido.Id))
-                                       .FirstOrDefaultAsync();
+        var estoqueModel = await collection.Find(_ => _.Estoque.Any(e => e.ProdutoId == produtoPedido.Id))
+                                           .FirstOrDefaultAsync();
 
-        var qtdeProduto = estoqueProduto.Qtde - produtoPedido.Quantidade;
-
-
-        var filter = Builders<EstoqueModel>.Filter.ElemMatch(x => x.Estoque, e => e.ProdutoId == produtoPedido.Id);
-
-        var update = Builders<EstoqueModel>.Update.Set("estoque.$[elem].Qtde", qtdeProduto);
-
-        var arrayFilters = new List<ArrayFilterDefinition>
+        if (estoqueModel != null)
         {
-            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("elem.ProdutoId", produtoPedido.Id))
-        };
+            var estoqueProduto = estoqueModel.Estoque.FirstOrDefault(e => e.ProdutoId == produtoPedido.Id);
+            var qtdeProduto = estoqueProduto.Qtde - produtoPedido.Quantidade;
 
-        var options = new UpdateOptions { ArrayFilters = arrayFilters };
+            var filter = Builders<EstoqueModel>.Filter.Eq(x => x.id, estoqueModel.id)
+                         & Builders<EstoqueModel>.Filter.ElemMatch(x => x.Estoque, e => e.ProdutoId == produtoPedido.Id);
 
-        await collection.UpdateOneAsync(filter, update, options);
+            var update = Builders<EstoqueModel>.Update.Set("estoque.$.qtde", qtdeProduto);
+
+            await collection.UpdateOneAsync(filter, update);
+        }
     }
 
     [FunctionName("EnviarEmailActivity")]
-    public async Task EnviarEmailActivity([ActivityTrigger] PedidoModel pedido)
+    public async Task EnviarEmailActivity([ActivityTrigger] IDurableActivityContext context)
     {
+        var pedido = context.GetInput<PedidoModel>();
+
         var config = new ConfigurationBuilder()
             .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
             .AddEnvironmentVariables()
