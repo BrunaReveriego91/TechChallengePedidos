@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
@@ -14,6 +15,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using TechChallengePedidos.Model.Model.EstoqueProdutos;
 using TechChallengePedidos.Model.Model.Pedidos;
 using TechChallengePedidos.Model.Model.Produtos;
 
@@ -74,6 +76,36 @@ public class ProcessarPedidoFunction
 
         return await collection.Find(_ => true).ToListAsync();
 
+    }
+
+    [FunctionName("AtualizarEstoqueProduto")]
+    public async Task AtualizarEstoqueProduto([ActivityTrigger] IDurableActivityContext context)
+    {
+
+        var produtoPedido = context.GetInput<ProdutoPedidoModel>();
+
+        IMongoDatabase database = ObterConexaoDatabase();
+        var collection = database.GetCollection<EstoqueModel>("estoque");
+
+        var estoqueProduto = await collection.Find(x => x.Estoque.Any(e => e.ProdutoId == produtoPedido.Id))
+                                       .Project(x => x.Estoque.FirstOrDefault(e => e.ProdutoId == produtoPedido.Id))
+                                       .FirstOrDefaultAsync();
+
+        var qtdeProduto = estoqueProduto.Qtde - produtoPedido.Quantidade;
+
+
+        var filter = Builders<EstoqueModel>.Filter.ElemMatch(x => x.Estoque, e => e.ProdutoId == produtoPedido.Id);
+
+        var update = Builders<EstoqueModel>.Update.Set("estoque.$[elem].Qtde", qtdeProduto);
+
+        var arrayFilters = new List<ArrayFilterDefinition>
+        {
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("elem.ProdutoId", produtoPedido.Id))
+        };
+
+        var options = new UpdateOptions { ArrayFilters = arrayFilters };
+
+        await collection.UpdateOneAsync(filter, update, options);
     }
 
     [FunctionName("EnviarEmailActivity")]
