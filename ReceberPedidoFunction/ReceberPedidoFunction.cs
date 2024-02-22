@@ -18,8 +18,7 @@ namespace ReceberPedidoFunction
 
         [FunctionName("ReceberPedidoFunction")]
         public static async Task<IActionResult> ReceberPedido(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
-        [DurableClient] IDurableOrchestrationClient starter)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
         {
             try
             {

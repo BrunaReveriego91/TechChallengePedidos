@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using TechChallengePedidos.Model.Model.EstoqueProdutos;
 using TechChallengePedidos.Model.Model.Pedidos;
@@ -164,19 +163,16 @@ namespace OrquestradorPedidoFunction
 
 
         [FunctionName("ProcessarPedido")]
-        public async Task ProcessarPedido([ActivityTrigger] IDurableActivityContext context)
+        public async Task ProcessarPedido([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var pedido = context.GetInput<PedidoModel>();
 
             string requestBody = JsonConvert.SerializeObject(pedido);
-            var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
-            var httpClient = new HttpClient();
+            var response = await context.CallHttpAsync(HttpMethod.Post, new Uri(urlProcessarPedido), requestBody);
 
-            var response = await httpClient.PostAsync(urlProcessarPedido, content);
-
-            if (response.StatusCode != System.Net.HttpStatusCode.OK || response.StatusCode != System.Net.HttpStatusCode.Accepted)
-                throw new Exception("Falha ao orquestrar pedido.");
+            if ((int)response.StatusCode < 200 || (int)response.StatusCode > 202)
+                throw new Exception($"Falha ao orquestrar pedido. Status code: {response.StatusCode}");
 
 
         }
