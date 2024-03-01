@@ -42,6 +42,14 @@ namespace OrquestradorPedidoFunction
                 Mensagem.AppendLine("CEP Inválido.");
             }
 
+            if (string.IsNullOrEmpty(pedido.Cliente.Email) && !ValidarEmail(pedido.Cliente.Email.Trim()))
+            {
+
+                valido = false;
+                Mensagem.AppendLine("E-mail Inválido.");
+            }
+
+
             return valido;
         }
 
@@ -111,14 +119,18 @@ namespace OrquestradorPedidoFunction
             regexPattern = @"^\(\d{2}\)9\d{4}-\d{4}$";
 
             // Verificar se o telefone corresponde ao padrão da expressão regular
-            if (Regex.IsMatch(contato, regexPattern))
-            {
-                return true;
-            }
-
-            return false;
+            return (Regex.IsMatch(contato, regexPattern));
+          
 
         }
+
+        private static bool ValidarEmail(string email)
+        {
+            string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+            return Regex.IsMatch(email, pattern);
+        }
+
 
         private static bool ValidarCEP(string cep)
         {
